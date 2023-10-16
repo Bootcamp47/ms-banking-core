@@ -1,0 +1,12 @@
+server:
+  port: 8090
+
+spring:
+  data:
+    mongodb:
+      uri: "mongodb+srv://ddcdeveloper95:overdose95@cluster0.v5cmi.mongodb.net/?retryWrites=true&w=majority"
+      database: bc47
+
+logging:
+  pattern:
+    console: "%d{dd-MM-yyyy HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
