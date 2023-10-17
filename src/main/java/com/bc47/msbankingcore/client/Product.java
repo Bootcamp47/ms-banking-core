@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Product {
 
-    private Long id;
+    private String id;
     private String productType;
     private String productCategory;
     private String state;

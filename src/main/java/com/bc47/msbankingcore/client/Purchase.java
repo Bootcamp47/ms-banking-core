@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Purchase {
 
-    private Long id;
-    private Long customerId;
+    private String id;
+    private String customerId;
     private String customerType;
     private String customerName;
-    private Long productId;
+    private String productId;
     private String productType;
     private String productCategory;
     private String createdAt;

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Customer {
 
-    private Long id;
+    private String id;
     private String customerType;
     private String name;
     private String docType;

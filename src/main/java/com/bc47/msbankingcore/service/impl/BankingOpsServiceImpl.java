@@ -9,22 +9,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.Objects;
 import static com.bc47.msbankingcore.util.Constants.*;
 
 @Service
 public class BankingOpsServiceImpl implements BankingOpsService {
 
-    private WebClient customersClient;
-    private WebClient productsClient;
-    private WebClient purchasesClient;
-    private WebClient transactionsClient;
+    private final WebClient customersClient;
+    private final WebClient productsClient;
+    private final WebClient purchasesClient;
+    private final WebClient transactionsClient;
+
+    public BankingOpsServiceImpl(WebClient.Builder webClientBuilder) {
+        this.customersClient = webClientBuilder.baseUrl(CUSTOMERS_URI).build();
+        this.productsClient = webClientBuilder.baseUrl(PRODUCTS_URI).build();
+        this.purchasesClient = webClientBuilder.baseUrl(PURCHASES_URI).build();
+        this.transactionsClient = webClientBuilder.baseUrl(TRANSACTIONS_URI).build();
+    }
 
     @Override
     public Flux<Purchase> grantProductToCustomer(Purchase purchase) {
         Purchase purchaseCreated = new Purchase();
-        customersClient = WebClient.create(CUSTOMERS_URI);
-        productsClient = WebClient.create(PRODUCTS_URI);
-        purchasesClient = WebClient.create(PURCHASES_URI);
 
         return customersClient.get()
                 .uri(CUSTOMERS_PATH + "/" + purchase.getCustomerId())
@@ -57,7 +62,6 @@ public class BankingOpsServiceImpl implements BankingOpsService {
 
     @Override
     public Flux<Purchase> retrieveCustomerPurchases(String customerId) {
-        purchasesClient = WebClient.create(PURCHASES_URI);
         return purchasesClient.get()
                 .uri(PURCHASES_PATH + "/customer/" + customerId)
                 .retrieve()
@@ -65,12 +69,62 @@ public class BankingOpsServiceImpl implements BankingOpsService {
     }
 
     @Override
-    public Mono<Transaction> deposit(String customerId, String purchaseId, double amount) {
-        return null;
+    public Flux<Transaction> deposit(String customerId, String purchaseId, double amount) {
+        Transaction transaction = new Transaction();
+
+        return customersClient.get()
+                .uri(CUSTOMERS_PATH + "/" + customerId)
+                .retrieve()
+                .bodyToFlux(Customer.class)
+                .next()
+                .flatMap(customer -> {
+                    transaction.setCustomerId(customer.getId());
+                    transaction.setTransactionType("DEPOSIT");
+                    transaction.setAmount(amount);
+                    return Mono.just(transaction);
+                })
+                .concatWith(purchasesClient.get()
+                        .uri(PURCHASES_PATH + "/customer/" + customerId)
+                        .retrieve()
+                        .bodyToFlux(Purchase.class)
+                        .filter(p -> Objects.equals(p.getId(), purchaseId))
+                        .flatMap(purchase -> {
+                            transaction.setPurchaseId(purchase.getId());
+                            return transactionsClient.post()
+                                    .uri(TRANSACTIONS_PATH)
+                                    .body(Mono.just(transaction), Transaction.class)
+                                    .retrieve()
+                                    .bodyToMono(Transaction.class);
+                        }));
     }
 
     @Override
-    public Mono<Transaction> withdraw(String customerId, String purchaseId, double amount) {
-        return null;
+    public Flux<Transaction> withdraw(String customerId, String purchaseId, double amount) {
+        Transaction transaction = new Transaction();
+
+        return customersClient.get()
+                .uri(CUSTOMERS_PATH + "/" + customerId)
+                .retrieve()
+                .bodyToFlux(Customer.class)
+                .next()
+                .flatMap(customer -> {
+                    transaction.setCustomerId(customer.getId());
+                    transaction.setTransactionType("WITHDRAWAL");
+                    transaction.setAmount(amount);
+                    return Mono.just(transaction);
+                })
+                .concatWith(purchasesClient.get()
+                        .uri(PURCHASES_PATH + "/customer/" + customerId)
+                        .retrieve()
+                        .bodyToFlux(Purchase.class)
+                        .filter(p -> Objects.equals(p.getId(), purchaseId))
+                        .flatMap(purchase -> {
+                            transaction.setPurchaseId(purchase.getId());
+                            return transactionsClient.post()
+                                    .uri(TRANSACTIONS_PATH)
+                                    .body(Mono.just(transaction), Transaction.class)
+                                    .retrieve()
+                                    .bodyToMono(Transaction.class);
+                        }));
     }
 }

@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Transaction {
 
-    private Long id;
-    private Long purchaseId;
+    private String id;
+    private String customerId;
+    private String purchaseId;
     private String source;
     private String transactionType;
     private String createdAt;
