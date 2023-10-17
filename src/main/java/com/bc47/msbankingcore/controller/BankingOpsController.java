@@ -21,7 +21,7 @@ public class BankingOpsController {
         return bankingOpsService.grantProductToCustomer(purchase);
     }
 
-    // -------------------Retrieve customer products (purchases)
+    // -------------------Retrieve customer's products (purchases)
 
     @GetMapping("/retrieve-customer-products/{id}")
     public Flux<Purchase> retrieveCustomerPurchases(@PathVariable("id") String id) {
@@ -44,5 +44,13 @@ public class BankingOpsController {
                                      @RequestParam(value = "purchaseId") String purchaseId,
                                      @RequestParam(value = "amount") double amount) {
         return bankingOpsService.withdraw(customerId, purchaseId, amount);
+    }
+
+    // -------------------Retrieve some customer's purchase movements/transactions
+
+    @GetMapping("/retrieve-customer-purchase-movements")
+    public Flux<Transaction> retrieveCustomerPurchaseMovements(@RequestParam(value = "customerId") String customerId,
+                                                               @RequestParam(value = "purchaseId") String purchaseId) {
+        return bankingOpsService.retrieveCustomerPurchaseMovements(customerId, purchaseId);
     }
 }

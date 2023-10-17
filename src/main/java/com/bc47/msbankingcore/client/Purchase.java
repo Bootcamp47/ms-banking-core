@@ -1,5 +1,6 @@
 package com.bc47.msbankingcore.client;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
