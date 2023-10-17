@@ -1,10 +1,10 @@
 package com.bc47.msbankingcore.client;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class Customer {
 
     private Long id;
@@ -18,6 +18,6 @@ public class Customer {
     private String status;
     private String email;
     private String mobilePhoneImeiNumber;
-    private Integer ownedPasiveProductsQty = 0;
-    private Integer ownedActiveProductsQty = 0;
+    private Integer ownedPasiveProductsQty;
+    private Integer ownedActiveProductsQty;
 }
